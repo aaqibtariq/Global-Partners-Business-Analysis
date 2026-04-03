@@ -10,4 +10,7 @@ https://learn.microsoft.com/en-us/sql/connect/jdbc/microsoft-jdbc-driver-for-sql
 # Create Glue Connection
 
 **Before setting up this make sure your VPC configrations are correct**
-**You have to have 
+**Glue Security Group, Subnet, Endpoints should be linked properly same as RDS**
+
+
+
