@@ -39,9 +39,6 @@
 
 - Open port 1433 so SSMS on your laptop can reach RDS in case it's blocked
 - RDS Console → click your database → scroll to Security → click the VPC security group link
-- Click "Outbound rules" tabl -> edit outbound rules -> add rule
-- IPv4, All Traffic, ALL, ALL, 0.0.0.0/0
-- click save rules
 - Click "Inbound rules" tab → "Edit inbound rules" → "Add rule"
 - Rule 1: Type = MS SQL · Port = 1433 · Source = My IP (auto-fills your laptop IP)
 - Rule 2: Type = MS SQL · Port = 1433 · Source = Custom · enter your Glue VPC CIDR (e.g. 10.0.0.0/16) — so Glue jobs can connect later
@@ -51,6 +48,15 @@
 - All Trafic, all, all, 4.37.54.43/32
 - All TCp, TCP, 0-65535, default SG
 - Click Save rules
+
+  
+###  Security Group – Inbound Rules
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/Security%20group%20inbound%20rules.png" width="750"/>
+</p>
+
+
 
 ## VPC
 
@@ -96,7 +102,21 @@ We will Create 3 Endpoints
 - Policy -> Full access
 - Create endpoint
 
+###  Route Table Setup
+<p align="center">
+  <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/Route%20table.png" width="750"/>
+</p>
 
+### Subnets Configuration
+<p align="center">
+  <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/subnets%20.png" width="750"/>
+</p>
+
+###  VPC 
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/VPC.png" width="750"/>
+</p>
 
 ## Get Your Connection Details
 
