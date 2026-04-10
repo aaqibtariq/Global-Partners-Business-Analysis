@@ -39,6 +39,9 @@
 
 - Open port 1433 so SSMS on your laptop can reach RDS in case it's blocked
 - RDS Console → click your database → scroll to Security → click the VPC security group link
+- Click "Outbound rules" tabl -> edit outbound rules -> add rule
+- IPv4, All Traffic, ALL, ALL, 0.0.0.0/0
+- click save rules
 - Click "Inbound rules" tab → "Edit inbound rules" → "Add rule"
 - Rule 1: Type = MS SQL · Port = 1433 · Source = My IP (auto-fills your laptop IP)
 - Rule 2: Type = MS SQL · Port = 1433 · Source = Custom · enter your Glue VPC CIDR (e.g. 10.0.0.0/16) — so Glue jobs can connect later
