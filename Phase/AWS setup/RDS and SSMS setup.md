@@ -46,6 +46,7 @@
 - All Trafic, all, all, default SG
 - MSQL, TCP, 1433, default SG
 - All Trafic, all, all, 4.37.54.43/32
+- All TCp, TCP, 0-65535, default SG
 - Click Save rules
 
 ## VPC
