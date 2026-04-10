@@ -58,17 +58,17 @@ We will Create 3 Endpoints
 
 - Open VPC
 - Click PrivateLink and Lattice -> Endpoint
-- Create Endpoint
+- **Create Endpoint**
 - Name tag - S3 gateway endpoint
 - Type ->  AWS service
 - Service -> com.amazonaws.us-east-1.s3 Gateway
 - Network settings -> VPC -> Select same the one you used in RDS default or the one you created
-- Route tables ->  Select the available route table so it will have subnets availailbel to use
+- Route tables ->  Select the available route table so it will have subnets available to use and make sure to Explicit subnet associations the one you using in glue connection
 - Policy -> Full access
 - Create endpoint
 
   
-- Create Endpoint
+- **Create Endpoint**
 - Name tag - STS endpoint
 - Type ->  AWS service
 - Service -> com.amazonaws.us-east-1.sts Interface
@@ -80,7 +80,7 @@ We will Create 3 Endpoints
 - Policy -> Full access
 - Create endpoint
 
-- Create Endpoint
+- **Create Endpoint**
 - Name tag - Secrets Manager endpoint
 - Type ->  AWS service
 - Service -> com.amazonaws.us-east-1.secretsmanager Interface
