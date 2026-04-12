@@ -35,6 +35,42 @@
  - All other settings remain default
  - Click Create and it will take 10-20 mins
 
+
+###  RDS Setup – Overview
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/RDS%201.png" width="750"/>
+</p>
+
+
+
+###  RDS Configuration Details
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/RDS%202.png" width="750"/>
+</p>
+
+
+###  RDS Connectivity & Security
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/RDS%203.png" width="750"/>
+</p>
+
+
+###  RDS Networking Setup
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/RDS%204.png" width="750"/>
+</p>
+
+###  RDS Monitoring & Additional Settings
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/RDS%205.png" width="750"/>
+</p>
+
+
 ## Security Group — Allow your laptop to connect
 
 - Open port 1433 so SSMS on your laptop can reach RDS in case it's blocked
@@ -61,6 +97,12 @@
 ## VPC
 
 We will Create 3 Endpoints 
+
+### VPC Endpoints Configuration
+<p align="center">
+  <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/Endpoints.png" width="750"/>
+</p>
+
 
 - **STS endpoint**
 - **Secrets Manager endpoint**
