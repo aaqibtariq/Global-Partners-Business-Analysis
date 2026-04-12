@@ -301,5 +301,19 @@ aws glue get-job --job-name glue_ingest_date_dim
 
 **Now Run the job and you will see results in Amazon S3 > Buckets > globalpartner-datalake > bronze/**
 
+##  AWS Glue Job Run – Execution Result
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/glue%20job%20run%20result.png" width="750"/>
+</p>
+
+- If it get fails then check the logs and CloudWatch All logs and error logs
+- Big reason include no SQL connection, Script issue or scrpt path wrong, and VPC configration
+- Analyze logs and fix everything before re run as each run cost you money
+
+##  AWS Glue Job Run – Execution Result (Validation Run)
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/glue%20job%20run%20result%202.png" width="750"/>
+</p>
 
