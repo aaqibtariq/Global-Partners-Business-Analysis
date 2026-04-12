@@ -317,3 +317,12 @@ aws glue get-job --job-name glue_ingest_date_dim
   <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/glue%20job%20run%20result%202.png" width="750"/>
 </p>
 
+##  AWS Glue Job Runs – Consistent Execution Validation
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/glue%20job%20run%20result%203.png" width="700"/>
+</p>
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/glue%20job%20run%20result%204.png" width="700"/>
+</p>
