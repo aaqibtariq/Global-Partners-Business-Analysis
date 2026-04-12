@@ -292,3 +292,14 @@ Now check again and you shuld see connection
 aws glue get-job --job-name glue_ingest_date_dim
 ```
 
+## Important Note
+- After creating Glue job if you make any changes using Bash then dont go bnack to job detail and save as it will remove these Bash changes
+- Before Run double check your S3 script and make sure it's correct
+- For other two jobs clone this glue_ingest_date_dim and only change name and script file name
+- Follow same process of Bash if needed but make sure to change the name glue_ingest_date_dim to other jobs
+
+
+**Now Run the job and you will see results in Amazon S3 > Buckets > globalpartner-datalake > bronze/**
+
+
+
