@@ -115,6 +115,29 @@
 - Click Create bucket
 
 
-# Step 3 Setup Glue connection and VPC
+# Step 3 After creating RDS setup AWS Secrets Manager
+
+- Open AWS Secrets Manager
+- Click Store a new secret
+- Select Credentials for Amazon RDS Database
+- Under Credentials -> Enter your RDS admin username and password
+- Select DB instance the one you created in RDS
+- Give proper name Secret name and next
+- Nothing to do in Configure rotation - optional
+- Review and click store
+- Open your secret and Retrieve secret value
+- Click Edit
+- Add Engine key and value sqlserver
+- Add host key and value your rds Endpoint link globalpartners-db.xxxxxxxxx.us-east-1.rds.amazonaws.com
+- Add port key and value 1433
+- Add dbInstanceIdentifier and value your rds DB instance name
+- Click Save
+
+##  AWS Secrets Manager – Secure Credential Storage
+
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/aws%20secret.png" width="750"/>
+</p>
 
 
