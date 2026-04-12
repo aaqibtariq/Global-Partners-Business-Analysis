@@ -119,7 +119,13 @@ We will Create 3 Endpoints
 - Policy -> Full access
 - Create endpoint
 
-  
+  ###  S3 Gateway Endpoint
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/S3%20Gateway.png" width="750"/>
+</p>\
+
+
 - **Create Endpoint**
 - Name tag - STS endpoint
 - Type ->  AWS service
@@ -132,6 +138,12 @@ We will Create 3 Endpoints
 - Policy -> Full access
 - Create endpoint
 
+###  STS (Security Token Service) Endpoint
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/STS%20Endpoint.png" width="750"/>
+</p>
+
 - **Create Endpoint**
 - Name tag - Secrets Manager endpoint
 - Type ->  AWS service
@@ -143,6 +155,13 @@ We will Create 3 Endpoints
 - Security groups -> Select same the one you used in RDS default or the one you created
 - Policy -> Full access
 - Create endpoint
+
+###  AWS Secrets Manager
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/SecretManager.png" width="750"/>
+</p>
+
 
 ###  Route Table Setup
 <p align="center">
