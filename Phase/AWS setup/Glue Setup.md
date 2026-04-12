@@ -123,3 +123,172 @@ We have to create 3 jobs
 <p align="center">
   <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/glue_ingest_date_dim%204.png" width="750"/>
 </p>
+
+
+# Check detial by using AWS Bash 
+
+```
+
+~ $ aws glue get-job --job-name glue_ingest_date_dim
+{
+    "Job": {
+        "Name": "glue_ingest_date_dim",
+        "JobMode": "SCRIPT",
+        "JobRunQueuingEnabled": false,
+        "Description": "Bronze ingestion — reads date_dim from SQL Server, writes Delta to S3",
+        "Role": "****/GlueExecutionRole-GlobalPartners",
+        "CreatedOn": "2026-04-09T15:58:15.097000+00:00",
+        "LastModifiedOn": "2026-04-09T16:12:32.817000+00:00",
+        "ExecutionProperty": {
+            "MaxConcurrentRuns": 1
+        },
+        "Command": {
+            "Name": "glueetl",
+            "ScriptLocation": "s3://globalpartner-glue-scripts/bronze/glue_ingest_date_dim.py",
+            "PythonVersion": "3"
+        },
+        "DefaultArguments": {
+            "--enable-glue-datacatalog": "true",
+            "--datalake_bucket": "globalpartner-datalake",
+            "--job-bookmark-option": "job-bookmark-disable",
+            "--datalake-formats": "delta",
+            "--TempDir": "s3://globalpartner-glue-scripts/temporary/",
+            "--extra-jars": "s3://globalpartner-glue-scripts/sqljdbc_13.4/enu/jars/mssql-jdbc-13.4.0.jre11.jar",
+            "--secret_name": "globalparnter_secret",
+            "--enable-metrics": "true",
+:...skipping...
+{
+    "Job": {
+        "Name": "glue_ingest_date_dim",
+        "JobMode": "SCRIPT",
+        "JobRunQueuingEnabled": false,
+        "Description": "Bronze ingestion — reads date_dim from SQL Server, writes Delta to S3",
+        "Role": "****/GlueExecutionRole-GlobalPartners",
+        "CreatedOn": "2026-04-09T15:58:15.097000+00:00",
+        "LastModifiedOn": "2026-04-09T16:12:32.817000+00:00",
+        "ExecutionProperty": {
+            "MaxConcurrentRuns": 1
+        },
+        "Command": {
+            "Name": "glueetl",
+            "ScriptLocation": "s3://globalpartner-glue-scripts/bronze/glue_ingest_date_dim.py",
+            "PythonVersion": "3"
+        },
+        "DefaultArguments": {
+            "--enable-glue-datacatalog": "true",
+            "--datalake_bucket": "globalpartner-datalake",
+            "--job-bookmark-option": "job-bookmark-disable",
+            "--datalake-formats": "delta",
+            "--TempDir": "s3://globalpartner-glue-scripts/temporary/",
+            "--extra-jars": "s3://globalpartner-glue-scripts/sqljdbc_13.4/enu/jars/mssql-jdbc-13.4.0.jre11.jar",
+            "--secret_name": "globalparnter_secret",
+            "--enable-metrics": "true",
+            "--enable-spark-ui": "true",
+            "--spark-event-logs-path": "s3://globalpartner-glue-scripts/sparkHistoryLogs/",
+            "--enable-job-insights": "true",
+            "--enable-observability-metrics": "true",
+            "--conf": "spark.hadoop.hive.metastore.client.factory.class=com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory --conf spark.eventLog.rolling.enabled=true --conf spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension --conf spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog --conf spark.delta.logStore.class=org.apache.spark.sql.delta.storage.S3SingleDriverLogStore",
+            "--enable-continuous-cloudwatch-log": "true",
+            "--job-language": "python"
+        },
+        "Connections": {
+            "Connections": [
+                "Sqlserver connection"
+            ]
+        },
+        "MaxRetries": 3,
+        "AllocatedCapacity": 2,
+        "Timeout": 60,
+        "MaxCapacity": 2.0,
+        "WorkerType": "G.1X",
+        "NumberOfWorkers": 2,
+        "GlueVersion": "4.0",
+        "ExecutionClass": "STANDARD"
+    }
+}
+~
+~
+~
+~
+~
+~
+~
+(END)
+
+```
+
+If you missing this 
+
+```
+        "Connections": {
+            "Connections": [
+                "Sqlserver connection"
+            ]
+        },
+```
+
+Then run these 
+
+```
+
+cat > job-update-date-dim.json <<'EOF'
+{
+  "Role": "****/GlueExecutionRole-GlobalPartners",
+  "Command": {
+    "Name": "glueetl",
+    "ScriptLocation": "s3://globalpartner-glue-scripts/bronze/glue_ingest_date_dim.py",
+    "PythonVersion": "3"
+  },
+  "Description": "Bronze ingestion — reads date_dim from SQL Server, writes Delta to S3",
+  "DefaultArguments": {
+    "--enable-glue-datacatalog": "true",
+    "--datalake_bucket": "globalpartner-datalake",
+    "--job-bookmark-option": "job-bookmark-disable",
+    "--datalake-formats": "delta",
+    "--TempDir": "s3://globalpartner-glue-scripts/temporary/",
+    "--extra-jars": "s3://globalpartner-glue-scripts/sqljdbc_13.4/enu/jars/mssql-jdbc-13.4.0.jre11.jar",
+    "--secret_name": "globalparnter_secret",
+    "--enable-metrics": "true",
+    "--enable-spark-ui": "true",
+    "--spark-event-logs-path": "s3://globalpartner-glue-scripts/sparkHistoryLogs/",
+    "--enable-job-insights": "true",
+    "--enable-observability-metrics": "true",
+    "--conf": "spark.hadoop.hive.metastore.client.factory.class=com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory --conf spark.eventLog.rolling.enabled=true --conf spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension --conf spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog --conf spark.delta.logStore.class=org.apache.spark.sql.delta.storage.S3SingleDriverLogStore",
+    "--enable-continuous-cloudwatch-log": "true",
+    "--job-language": "python"
+  },
+  "ExecutionProperty": {
+    "MaxConcurrentRuns": 1
+  },
+  "MaxRetries": 3,
+  "Timeout": 60,
+  "GlueVersion": "4.0",
+  "WorkerType": "G.1X",
+  "NumberOfWorkers": 2,
+  "ExecutionClass": "STANDARD",
+  "Connections": {
+    "Connections": ["Sqlserver connection"]
+  }
+}
+EOF
+
+```
+
+After this Run
+
+```
+
+aws glue update-job \
+  --job-name glue_ingest_date_dim \
+  --job-update file://job-update-date-dim.json
+
+```
+
+Now check again and you shuld see connection 
+- "JobMode": "SCRIPT"
+-  "Sqlserver connection"
+
+```
+aws glue get-job --job-name glue_ingest_date_dim
+```
+
