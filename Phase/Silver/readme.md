@@ -9,6 +9,8 @@
 
 Upload scripts  to Amazon S3 Buckets -> globalpartner-glue-scripts -> silver/
 
+<p align="center"> <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/Silver/silver%20scripts.png" width="750"/> </p>
+
 # Step 3 Add new permissions to IAM Role
 
 Incline new policy GlueReadWriteGpSsmParameters
@@ -47,6 +49,9 @@ Create Endpoint
 - Policy -> Full access
 - Create endpoint
 
+### SSM / Endpoint Configuration
+
+<p align="center"> <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/Silver/silve%20SSM%20endpoint.png" width="750"/> </p>
 
 # Step 5 Glue Job setup
 
@@ -134,4 +139,9 @@ We have to create 2 jobs
 	-	Key -> --conf Value ->  spark.delta.logStore.class=org.apache.spark.sql.delta.storage.S3SingleDriverLogStore
 Save ( Don't Run Yet)
 
+
+
+### Result in S3
+
+<p align="center"> <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/Silver/Silver%20S3%20results.png" width="750"/> </p>
 
