@@ -108,3 +108,43 @@ LIMIT 10;
 
 ```
 
+
+# Check Nulls
+
+```sql
+
+SELECT *
+FROM dbo.order_item_options
+WHERE OPTION_PRICE IS NULL
+   OR OPTION_QUANTITY IS NULL;
+
+```
+
+# check Duplicates 
+
+``` sql
+
+SELECT ORDER_ID, LINEITEM_ID, COUNT(*)
+FROM dbo.order_items
+GROUP BY ORDER_ID, LINEITEM_ID
+HAVING COUNT(*) > 1;
+
+SELECT ORDER_ID, LINEITEM_ID, COUNT(*)
+FROM dbo.order_item_options
+GROUP BY ORDER_ID, LINEITEM_ID
+HAVING COUNT(*) > 1;
+
+```
+
+# check join coverage 
+
+```sql
+
+SELECT COUNT(*)
+FROM dbo.order_items oi
+LEFT JOIN dbo.order_item_options oio
+  ON oi.ORDER_ID = oio.ORDER_ID
+ AND oi.LINEITEM_ID = oio.LINEITEM_ID
+WHERE oio.ORDER_ID IS NULL;
+
+```
