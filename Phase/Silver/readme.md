@@ -139,7 +139,24 @@ We have to create 2 jobs
 	-	Key -> --conf Value ->  spark.delta.logStore.class=org.apache.spark.sql.delta.storage.S3SingleDriverLogStore
 Save ( Don't Run Yet)
 
+### Glue Job 
 
+<p align="center"> <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/Silver/glue_silver_clean_orders%201.png" width="750"/> </p>
+
+<p align="center"> <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/Silver/glue_silver_clean_orders%202.png" width="750"/> </p>
+
+
+<p align="center"> <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/Silver/glue_silver_clean_orders%203.png" width="750"/> </p>
+
+
+<p align="center"> <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/Silver/glue_silver_clean_orders%204.png" width="750"/> </p>
+
+
+<p align="center"> <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/Silver/glue_silver_clean_orders%205.png" width="750"/> </p>
+
+### Glue job result
+
+<p align="center"> <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/Silver/glue_silver_clean_dates%20run%20results.png" width="750"/> </p>
 
 ### Result in S3
 
