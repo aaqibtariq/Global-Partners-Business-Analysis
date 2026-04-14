@@ -56,6 +56,7 @@ We have to create 2 jobs
 
 - glue_silver_clean_orders
 
+<p align="center"> <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/Silver/Silver%20glue%20%20jobs.png" width="750"/> </p>
 
 ## glue_silver_clean_orders
 
