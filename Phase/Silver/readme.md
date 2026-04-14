@@ -137,7 +137,10 @@ We have to create 2 jobs
 	-	Key -> --conf  Value -> spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension
 	-	Key -> --conf Value ->  spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog
 	-	Key -> --conf Value ->  spark.delta.logStore.class=org.apache.spark.sql.delta.storage.S3SingleDriverLogStore
-Save ( Don't Run Yet)
+
+
+- Save
+- Before running please check your scripts and then run
 
 ### Glue Job 
 
