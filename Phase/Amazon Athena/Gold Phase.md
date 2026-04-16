@@ -31,6 +31,14 @@ CREATE EXTERNAL TABLE globalpartners_gold.churn
 LOCATION 's3://globalpartner-datalake/gold/churn/'
 TBLPROPERTIES ('table_type' = 'DELTA');
 
+CREATE EXTERNAL TABLE globalpartners_gold.discounts
+LOCATION 's3://globalpartner-datalake/gold/discounts/'
+TBLPROPERTIES ('table_type' = 'DELTA');
+
+CREATE EXTERNAL TABLE globalpartners_gold.location_performance
+LOCATION 's3://globalpartner-datalake/gold/location_performance/'
+TBLPROPERTIES ('table_type' = 'DELTA');
+
 ```
 
 # Check Tables
@@ -50,6 +58,8 @@ SELECT COUNT(*) FROM globalpartners_gold.loyalty;
 SELECT COUNT(*) FROM globalpartners_gold.daily_clv;
 SELECT COUNT(*) FROM globalpartners_gold.rfm;
 SELECT COUNT(*) FROM globalpartners_gold.churn;
+SELECT COUNT(*) FROM globalpartners_gold.discounts;
+SELECT COUNT(*) FROM globalpartners_gold.location_performance;
 
 ```
 ## gold.sales
@@ -187,3 +197,73 @@ ORDER BY spend_change_pct ASC
 LIMIT 10;
 
 ```
+
+# glue_gold_discounts.py
+
+```sql
+
+
+# discount_status
+
+SELECT *
+FROM globalpartners_gold.discounts
+ORDER BY order_date, discount_status
+LIMIT 20;
+
+
+# Total comparison
+
+
+SELECT discount_status, SUM(total_orders) AS orders, SUM(net_revenue) AS revenue
+FROM globalpartners_gold.discounts
+GROUP BY discount_status;
+
+# Discount impact
+
+SELECT
+    discount_status,
+    SUM(gross_revenue) AS gross_revenue,
+    SUM(discount_amount) AS discount_amount,
+    SUM(net_revenue) AS net_revenue
+FROM globalpartners_gold.discounts
+GROUP BY discount_status;
+
+```
+
+# glue_gold_location_performance.py
+
+```sql
+
+# preview
+
+SELECT *
+FROM globalpartners_gold.location_performance
+ORDER BY order_date, total_revenue DESC
+LIMIT 20;
+
+
+
+# Top locations by revenue
+
+SELECT
+    restaurant_id,
+    SUM(total_revenue) AS revenue,
+    SUM(total_orders) AS orders,
+    ROUND(SUM(total_revenue) / SUM(total_orders), 2) AS avg_order_value
+FROM globalpartners_gold.location_performance
+GROUP BY restaurant_id
+ORDER BY revenue DESC
+LIMIT 10;
+
+
+# Lowest locations by revenue
+
+SELECT
+    restaurant_id,
+    SUM(total_revenue) AS revenue,
+    SUM(total_orders) AS orders,
+    ROUND(SUM(total_revenue) / SUM(total_orders), 2) AS avg_order_value
+FROM globalpartners_gold.location_performance
+GROUP BY restaurant_id
+ORDER BY revenue ASC
+LIMIT 10;
