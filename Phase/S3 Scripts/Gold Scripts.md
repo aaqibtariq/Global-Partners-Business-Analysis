@@ -259,3 +259,76 @@ print(f"=== SUCCESS: Gold daily_clv at {GOLD_CLV} ===")
 job.commit()
 
 ```
+
+# glue_gold_rfm
+
+```sql
+
+import sys
+from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+from awsglue.context import GlueContext
+from awsglue.job import Job
+from pyspark.sql.functions import (
+    datediff, current_date, current_timestamp, countDistinct,
+    max as spark_max, sum as spark_sum, when, col, to_date
+)
+
+args = getResolvedOptions(sys.argv, ["JOB_NAME"])
+sc = SparkContext()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
+job = Job(glueContext)
+job.init(args["JOB_NAME"], args)
+
+SILVER_PATH = "s3://globalpartner-datalake/silver/orders/"
+GOLD_RFM = "s3://globalpartner-datalake/gold/rfm/"
+
+print("=== Reading Silver orders ===")
+silver = spark.read.format("delta").load(SILVER_PATH)
+
+# Exclude guest users first
+silver = silver.filter(col("user_id") != "GUEST")
+
+# Extract date from order_ts
+silver = silver.withColumn("order_date", to_date(col("order_ts")))
+
+# Aggregate to order level first
+order_totals = (
+    silver.groupBy("user_id", "order_id", "order_date")
+    .agg(
+        spark_sum("line_total").alias("order_value"),
+        spark_max("order_date").alias("last_order_date")
+    )
+)
+
+# Customer-level RFM
+rfm = (
+    order_totals.groupBy("user_id")
+    .agg(
+        datediff(current_date(), spark_max("last_order_date")).alias("recency_days"),
+        countDistinct("order_id").alias("frequency_orders"),
+        spark_sum("order_value").alias("monetary_value")
+    )
+)
+
+# Segment assignment
+rfm = rfm.withColumn(
+    "rfm_segment",
+    when((col("recency_days") <= 30) & (col("frequency_orders") >= 5), "VIP")
+    .when(col("frequency_orders") == 1, "New Customer")
+    .when(col("recency_days") > 45, "Churn Risk")
+    .otherwise("Regular")
+)
+
+rfm = rfm.withColumn("gold_load_ts", current_timestamp())
+
+print(f"RFM customers: {rfm.count()}")
+print("Segment distribution:")
+rfm.groupBy("rfm_segment").count().orderBy("count", ascending=False).show()
+
+rfm.write.format("delta").mode("overwrite").save(GOLD_RFM)
+print(f"=== SUCCESS: Gold RFM at {GOLD_RFM} ===")
+job.commit()
+
+```
