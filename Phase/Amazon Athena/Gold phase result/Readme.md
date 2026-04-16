@@ -10,6 +10,8 @@
 
 Upload scripts  to Amazon S3 Buckets -> globalpartner-glue-scripts -> gold/
 
+# Step 3 - Glue job
+
 ## glue_gold_sales
 
 - Click Create job
