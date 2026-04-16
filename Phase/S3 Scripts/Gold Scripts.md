@@ -1,7 +1,7 @@
 
 # glue_gold_sales.py
 
-```sql
+```python
 
 import sys
 from awsglue.utils import getResolvedOptions
@@ -111,7 +111,7 @@ job.commit()
 ```
 # glue_gold_loyalty.py
 
-```sql
+```python
 
 import sys
 from awsglue.utils import getResolvedOptions
@@ -175,5 +175,87 @@ loyalty.write.format("delta").mode("overwrite").save(GOLD_LOYALTY)
 print(f"=== SUCCESS: Gold Loyalty at {GOLD_LOYALTY} ===")
 job.commit()
 
+
+```
+
+# glue_gold_daily_clv.py
+
+```python
+
+import sys
+from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+from awsglue.context import GlueContext
+from awsglue.job import Job
+from pyspark.sql.functions import (
+    col,
+    countDistinct,
+    sum as spark_sum,
+    min as spark_min,
+    max as spark_max,
+    round as spark_round,
+    current_timestamp,
+    when
+)
+from pyspark.sql.window import Window
+from pyspark.sql.functions import ntile
+
+args = getResolvedOptions(sys.argv, ["JOB_NAME"])
+sc = SparkContext()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
+job = Job(glueContext)
+job.init(args["JOB_NAME"], args)
+
+SILVER_PATH = "s3://globalpartner-datalake/silver/orders/"
+GOLD_CLV = "s3://globalpartner-datalake/gold/daily_clv/"
+
+print("=== Reading Silver orders ===")
+silver = spark.read.format("delta").load(SILVER_PATH)
+print(f"Total Silver rows: {silver.count()}")
+
+# Exclude guest users
+customers = silver.filter(col("user_id") != "GUEST")
+
+# Aggregate customer lifetime value metrics
+print("=== Aggregating customer CLV ===")
+clv = (
+    customers.groupBy("user_id")
+    .agg(
+        countDistinct("order_id").alias("total_orders"),
+        spark_round(spark_sum("line_total"), 2).alias("total_spent"),
+        spark_min("order_ts").alias("first_order_ts"),
+        spark_max("order_ts").alias("last_order_ts")
+    )
+)
+
+clv = clv.withColumn(
+    "avg_order_value",
+    spark_round(col("total_spent") / col("total_orders"), 2)
+)
+
+# 20/60/20 segmentation using ntile(5)
+print("=== Assigning CLV segments ===")
+w = Window.orderBy(col("total_spent").desc())
+
+clv = clv.withColumn("clv_bucket", ntile(5).over(w))
+
+clv = clv.withColumn(
+    "clv_segment",
+    when(col("clv_bucket") == 1, "High CLV")
+    .when(col("clv_bucket") == 5, "Low CLV")
+    .otherwise("Medium CLV")
+)
+
+clv = clv.drop("clv_bucket").withColumn("gold_load_ts", current_timestamp())
+
+print(f"Gold CLV rows: {clv.count()}")
+clv.show(10, truncate=False)
+
+# Write Gold output
+clv.write.format("delta").mode("overwrite").save(GOLD_CLV)
+
+print(f"=== SUCCESS: Gold daily_clv at {GOLD_CLV} ===")
+job.commit()
 
 ```
