@@ -508,3 +508,201 @@ print(f"=== SUCCESS: Gold Churn at {GOLD_CHURN} ===")
 job.commit()
 
 ```
+
+
+# glue_gold_discounts.py
+
+
+```python
+
+import sys
+from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+from awsglue.context import GlueContext
+from awsglue.job import Job
+from pyspark.sql.functions import (
+    col,
+    to_date,
+    when,
+    lit,
+    coalesce,
+    countDistinct,
+    sum as spark_sum,
+    round as spark_round,
+    current_timestamp,
+    max as spark_max
+)
+
+args = getResolvedOptions(sys.argv, ["JOB_NAME"])
+sc = SparkContext()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
+job = Job(glueContext)
+job.init(args["JOB_NAME"], args)
+
+SILVER_PATH = "s3://globalpartner-datalake/silver/orders/"
+GOLD_DISCOUNTS = "s3://globalpartner-datalake/gold/discounts/"
+
+print("=== Reading Silver orders ===")
+silver = spark.read.format("delta").load(SILVER_PATH)
+print(f"Silver rows: {silver.count()}")
+
+# Exclude guests only if you want customer-focused metrics.
+# For sales comparison, keep all orders.
+# Convert timestamp to date for trend reporting.
+silver = silver.withColumn("order_date", to_date(col("order_ts")))
+
+# ── STEP 1: Create line-level discount and revenue fields ─────────────
+# Gross revenue = item revenue before discount/options
+# Discount amount = only negative option_price impact, stored as positive number
+# Net revenue = already represented by line_total in Silver
+print("=== STEP 1: Calculating gross, discount, and net revenue at line level ===")
+
+line_discount_amount = when(
+    col("option_price") < 0,
+    (coalesce(col("option_price"), lit(0)) * coalesce(col("option_quantity"), lit(1)) * lit(-1))
+).otherwise(lit(0))
+
+silver = (
+    silver
+    .withColumn(
+        "gross_line_revenue",
+        spark_round(col("item_price") * col("item_quantity"), 2)
+    )
+    .withColumn(
+        "discount_amount_line",
+        spark_round(line_discount_amount, 2)
+    )
+    .withColumn(
+        "net_line_revenue",
+        spark_round(col("line_total"), 2)
+    )
+    .withColumn(
+        "has_discount_line",
+        when(col("option_price") < 0, lit(1)).otherwise(lit(0))
+    )
+)
+
+# ── STEP 2: Aggregate to order level first ────────────────────────────
+# Important so one order is counted once, even if multiple line items exist
+print("=== STEP 2: Aggregating to order level ===")
+
+order_level = (
+    silver.groupBy("order_date", "order_id")
+    .agg(
+        spark_max("user_id").alias("user_id"),
+        spark_max("is_loyalty").alias("is_loyalty"),
+        spark_sum("gross_line_revenue").alias("gross_revenue_order"),
+        spark_sum("discount_amount_line").alias("discount_amount_order"),
+        spark_sum("net_line_revenue").alias("net_revenue_order"),
+        spark_max("has_discount_line").alias("has_discount_order")
+    )
+)
+
+order_level = order_level.withColumn(
+    "discount_status",
+    when(col("has_discount_order") == 1, "Discounted")
+    .otherwise("Full Price")
+)
+
+# ── STEP 3: Aggregate to Gold daily discount cohorts ──────────────────
+print("=== STEP 3: Building Gold discount summary ===")
+
+gold_discounts = (
+    order_level.groupBy("order_date", "discount_status")
+    .agg(
+        countDistinct("order_id").alias("total_orders"),
+        countDistinct("user_id").alias("unique_customers"),
+        spark_round(spark_sum("gross_revenue_order"), 2).alias("gross_revenue"),
+        spark_round(spark_sum("discount_amount_order"), 2).alias("discount_amount"),
+        spark_round(spark_sum("net_revenue_order"), 2).alias("net_revenue")
+    )
+)
+
+gold_discounts = gold_discounts.withColumn(
+    "avg_order_value",
+    spark_round(col("net_revenue") / col("total_orders"), 2)
+)
+
+gold_discounts = gold_discounts.withColumn("gold_load_ts", current_timestamp())
+
+print(f"Gold discount rows: {gold_discounts.count()}")
+print("Discount status distribution:")
+gold_discounts.groupBy("discount_status").count().show()
+
+# ── STEP 4: Write Gold Delta ───────────────────────────────────────────
+gold_discounts.write.format("delta").mode("overwrite").save(GOLD_DISCOUNTS)
+
+print(f"=== SUCCESS: Gold discounts at {GOLD_DISCOUNTS} ===")
+job.commit()
+
+
+```
+
+
+# glue_gold_location_performance.py
+
+
+```python
+
+import sys
+from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+from awsglue.context import GlueContext
+from awsglue.job import Job
+from pyspark.sql.functions import (
+    col,
+    to_date,
+    countDistinct,
+    sum as spark_sum,
+    round as spark_round,
+    current_timestamp
+)
+
+args = getResolvedOptions(sys.argv, ["JOB_NAME"])
+sc = SparkContext()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
+job = Job(glueContext)
+job.init(args["JOB_NAME"], args)
+
+SILVER_PATH = "s3://globalpartner-datalake/silver/orders/"
+GOLD_LOCATION = "s3://globalpartner-datalake/gold/location_performance/"
+
+print("=== Reading Silver orders ===")
+silver = spark.read.format("delta").load(SILVER_PATH)
+print(f"Silver rows: {silver.count()}")
+
+# Ensure date column exists
+silver = silver.withColumn("order_date", to_date(col("order_ts")))
+
+# Keep only rows with restaurant_id
+silver = silver.filter(col("restaurant_id").isNotNull())
+
+# Aggregate at location + day grain
+location_perf = (
+    silver.groupBy("restaurant_id", "order_date")
+    .agg(
+        countDistinct("order_id").alias("total_orders"),
+        countDistinct("user_id").alias("unique_customers"),
+        spark_round(spark_sum("line_total"), 2).alias("total_revenue")
+    )
+)
+
+location_perf = location_perf.withColumn(
+    "avg_order_value",
+    spark_round(col("total_revenue") / col("total_orders"), 2)
+)
+
+location_perf = location_perf.withColumn("gold_load_ts", current_timestamp())
+
+print(f"Gold location rows: {location_perf.count()}")
+location_perf.show(10, truncate=False)
+
+location_perf.write.format("delta").mode("overwrite").save(GOLD_LOCATION)
+
+print(f"=== SUCCESS: Gold location_performance at {GOLD_LOCATION} ===")
+job.commit()
+
+
+```
