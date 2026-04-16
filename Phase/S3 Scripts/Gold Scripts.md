@@ -351,3 +351,160 @@ rfm.write.format("delta").mode("overwrite").save(GOLD_RFM)
 print(f"=== SUCCESS: Gold RFM at {GOLD_RFM} ===")
 job.commit()
 ```
+
+# glue_gold_churn.py
+
+```python
+
+import sys
+from datetime import timedelta
+from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+from awsglue.context import GlueContext
+from awsglue.job import Job
+from pyspark.sql.functions import (
+    lag,
+    avg,
+    datediff,
+    col,
+    when,
+    max as spark_max,
+    sum as spark_sum,
+    to_date,
+    round as spark_round,
+    lit,
+    current_timestamp
+)
+from pyspark.sql.window import Window
+
+args = getResolvedOptions(sys.argv, ["JOB_NAME"])
+sc = SparkContext()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
+job = Job(glueContext)
+job.init(args["JOB_NAME"], args)
+
+SILVER_PATH = "s3://globalpartner-datalake/silver/orders/"
+GOLD_CHURN = "s3://globalpartner-datalake/gold/churn/"
+
+print("=== Reading Silver orders ===")
+silver = spark.read.format("delta").load(SILVER_PATH)
+
+# Exclude guest users first
+silver = silver.filter(col("user_id") != "GUEST")
+
+# Convert timestamp to date
+silver = silver.withColumn("order_date", to_date(col("order_ts")))
+
+# Use dataset max date, not current_date()
+max_order_date = silver.agg(
+    spark_max("order_date").alias("max_date")
+).collect()[0]["max_date"]
+
+print(f"Dataset max order date: {max_order_date}")
+
+# Order-level aggregation
+order_rev = (
+    silver.groupBy("user_id", "order_id", "order_date")
+    .agg(
+        spark_round(spark_sum("line_total"), 2).alias("order_value")
+    )
+)
+
+# ── STEP 1: Average gap between orders ────────────────────
+w = Window.partitionBy("user_id").orderBy("order_date")
+
+churn = (
+    order_rev
+    .withColumn("prev_order_date", lag("order_date", 1).over(w))
+    .withColumn("gap_days", datediff(col("order_date"), col("prev_order_date")))
+)
+
+# ── STEP 2: Customer-level base churn metrics ─────────────
+churn_summary = (
+    churn.groupBy("user_id")
+    .agg(
+        spark_max("order_date").alias("last_order_date"),
+        spark_round(avg("gap_days"), 2).alias("avg_gap_days"),
+        spark_round(spark_sum("order_value"), 2).alias("total_spend")
+    )
+    .withColumn(
+        "days_since_last_order",
+        datediff(lit(max_order_date), col("last_order_date"))
+    )
+)
+
+# ── STEP 3: Spend trend windows (recent 90 days vs prior 90 days) ──
+recent_start = max_order_date - timedelta(days=90)
+prior_start = max_order_date - timedelta(days=180)
+prior_end = max_order_date - timedelta(days=91)
+
+print(f"Recent window start: {recent_start}")
+print(f"Prior window: {prior_start} to {prior_end}")
+
+recent_spend = (
+    order_rev
+    .filter(col("order_date") >= lit(recent_start))
+    .groupBy("user_id")
+    .agg(
+        spark_round(spark_sum("order_value"), 2).alias("recent_90d_spend")
+    )
+)
+
+prior_spend = (
+    order_rev
+    .filter((col("order_date") >= lit(prior_start)) & (col("order_date") <= lit(prior_end)))
+    .groupBy("user_id")
+    .agg(
+        spark_round(spark_sum("order_value"), 2).alias("prior_90d_spend")
+    )
+)
+
+# ── STEP 4: Join spend trend metrics ──────────────────────
+churn_summary = (
+    churn_summary
+    .join(recent_spend, ["user_id"], "left")
+    .join(prior_spend, ["user_id"], "left")
+    .fillna({
+        "avg_gap_days": 0,
+        "recent_90d_spend": 0,
+        "prior_90d_spend": 0
+    })
+)
+
+# Spend change %
+churn_summary = churn_summary.withColumn(
+    "spend_change_pct",
+    when(
+        col("prior_90d_spend") > 0,
+        spark_round(
+            ((col("recent_90d_spend") - col("prior_90d_spend")) / col("prior_90d_spend")) * 100,
+            2
+        )
+    ).otherwise(None)
+)
+
+# ── STEP 5: Churn status ──────────────────────────────────
+# Using requirement-aligned threshold:
+# >45 days = At Risk
+# <=7 days = Active
+# otherwise = Stable
+churn_summary = churn_summary.withColumn(
+    "churn_status",
+    when(col("days_since_last_order") > 45, "At Risk")
+    .when(col("days_since_last_order") <= 7, "Active")
+    .otherwise("Stable")
+)
+
+churn_summary = churn_summary.withColumn("gold_load_ts", current_timestamp())
+
+print(f"Churn customers: {churn_summary.count()}")
+print("Churn status distribution:")
+churn_summary.groupBy("churn_status").count().show()
+
+# Write Gold output
+churn_summary.write.format("delta").mode("overwrite").save(GOLD_CHURN)
+print(f"=== SUCCESS: Gold Churn at {GOLD_CHURN} ===")
+job.commit()
+
+```
