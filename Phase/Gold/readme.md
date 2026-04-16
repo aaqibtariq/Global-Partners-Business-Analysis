@@ -94,3 +94,10 @@ Upload scripts  to Amazon S3 Buckets -> globalpartner-glue-scripts -> gold/
 
 **Repeat same for all other glue job, clone this and change name and script name and run**
 
+
+## AWS Glue Jobs – Gold Layer Pipeline
+
+<p align="center"> <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/Gold%20glue%20jobs.png" width="750"/> </p>
+
+## Gold Layer – S3 Curated Outputs
+<p align="center"> <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/S3%20Gold.png" width="750"/> </p>
