@@ -270,8 +270,15 @@ from pyspark.context import SparkContext
 from awsglue.context import GlueContext
 from awsglue.job import Job
 from pyspark.sql.functions import (
-    datediff, current_date, current_timestamp, countDistinct,
-    max as spark_max, sum as spark_sum, when, col, to_date
+    datediff,
+    countDistinct,
+    max as spark_max,
+    sum as spark_sum,
+    when,
+    col,
+    to_date,
+    current_timestamp,
+    lit
 )
 
 args = getResolvedOptions(sys.argv, ["JOB_NAME"])
@@ -290,8 +297,12 @@ silver = spark.read.format("delta").load(SILVER_PATH)
 # Exclude guest users first
 silver = silver.filter(col("user_id") != "GUEST")
 
-# Extract date from order_ts
+# Convert order timestamp to date
 silver = silver.withColumn("order_date", to_date(col("order_ts")))
+
+# Get max date in dataset so recency is relative to data, not today
+max_order_date = silver.agg(spark_max("order_date").alias("max_date")).collect()[0]["max_date"]
+print(f"Dataset max order date: {max_order_date}")
 
 # Aggregate to order level first
 order_totals = (
@@ -302,22 +313,31 @@ order_totals = (
     )
 )
 
-# Customer-level RFM
+# Customer-level RFM metrics
 rfm = (
     order_totals.groupBy("user_id")
     .agg(
-        datediff(current_date(), spark_max("last_order_date")).alias("recency_days"),
+        datediff(lit(max_order_date), spark_max("last_order_date")).alias("recency_days"),
         countDistinct("order_id").alias("frequency_orders"),
         spark_sum("order_value").alias("monetary_value")
     )
 )
 
-# Segment assignment
+# Improved segmentation logic
 rfm = rfm.withColumn(
     "rfm_segment",
-    when((col("recency_days") <= 30) & (col("frequency_orders") >= 5), "VIP")
-    .when(col("frequency_orders") == 1, "New Customer")
-    .when(col("recency_days") > 45, "Churn Risk")
+    when(
+        (col("recency_days") <= 30) & (col("frequency_orders") >= 5),
+        "VIP"
+    )
+    .when(
+        (col("recency_days") <= 30) & (col("frequency_orders") <= 2),
+        "New Customer"
+    )
+    .when(
+        col("recency_days") > 90,
+        "Churn Risk"
+    )
     .otherwise("Regular")
 )
 
@@ -330,5 +350,4 @@ rfm.groupBy("rfm_segment").count().orderBy("count", ascending=False).show()
 rfm.write.format("delta").mode("overwrite").save(GOLD_RFM)
 print(f"=== SUCCESS: Gold RFM at {GOLD_RFM} ===")
 job.commit()
-
 ```
