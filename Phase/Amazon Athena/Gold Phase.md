@@ -16,6 +16,12 @@ CREATE EXTERNAL TABLE globalpartners_gold.sales
 LOCATION 's3://globalpartner-datalake/gold/sales/'
 TBLPROPERTIES ('table_type' = 'DELTA');
 
+CREATE EXTERNAL TABLE globalpartners_gold.loyalty
+LOCATION 's3://globalpartner-datalake/gold/loyalty/'
+TBLPROPERTIES ('table_type' = 'DELTA');
+
+
+
 ```
 
 # Check Tables
@@ -31,6 +37,7 @@ SHOW TABLES IN globalpartners_gold;
 ```sql
 
 SELECT COUNT(*) FROM globalpartners_gold.sales;
+SELECT COUNT(*) FROM globalpartners_gold.loyalty;
 
 ```
 ## gold.sales
@@ -64,3 +71,33 @@ ORDER BY total_revenue DESC
 LIMIT 10;
 
 ```
+## gold.loyalty
+
+```sql
+
+# View full table
+SELECT * FROM globalpartners_gold.loyalty;
+
+# Revenue check with silver and gold
+
+SELECT SUM(total_revenue) FROM globalpartners_gold.loyalty;
+SELECT SUM(line_total) FROM globalpartners_silver.orders WHERE user_id != 'GUEST';
+
+# Order check with silver and gold
+
+SELECT SUM(total_orders) FROM globalpartners_gold.loyalty;
+SELECT COUNT(DISTINCT order_id) FROM globalpartners_silver.orders WHERE user_id != 'GUEST';
+
+# Sanity check (distribution)
+
+SELECT 
+    cohort_label,
+    unique_customers,
+    total_orders,
+    total_revenue,
+    avg_order_value,
+    avg_clv_per_customer
+FROM globalpartners_gold.loyalty;
+
+```
+
