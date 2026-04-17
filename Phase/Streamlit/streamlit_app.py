@@ -1,39 +1,36 @@
 import streamlit as st
 import pandas as pd
-from sqlalchemy import create_engine
 import plotly.express as px
-import plotly.graph_objects as go
+from pyathena import connect
 
 st.set_page_config(page_title="Global Partners Business Insights", layout="wide")
 
-# -----------------------------
+# --------------------------------------------------
 # CONFIG
-# -----------------------------
+# --------------------------------------------------
 ATHENA_S3_STAGING = "s3://globalpartner-athena-results/"
 AWS_REGION = "us-east-1"
+ATHENA_SCHEMA = "globalpartners_gold"
 
-# Replace with your values if needed
-# You can also switch to PyAthena if that's what you're using
-ATHENA_CONN_STR = (
-    f"awsathena+rest://@athena.{AWS_REGION}.amazonaws.com:443/"
-    f"globalpartners_gold?s3_staging_dir={ATHENA_S3_STAGING}&work_group=primary"
-)
-
-# -----------------------------
-# CONNECTION
-# -----------------------------
+# --------------------------------------------------
+# ATHENA CONNECTION
+# --------------------------------------------------
 @st.cache_resource
-def get_engine():
-    return create_engine(ATHENA_CONN_STR)
+def get_connection():
+    return connect(
+        s3_staging_dir=ATHENA_S3_STAGING,
+        region_name=AWS_REGION,
+        schema_name=ATHENA_SCHEMA
+    )
 
 @st.cache_data(ttl=600)
 def load_data(query: str) -> pd.DataFrame:
-    engine = get_engine()
-    return pd.read_sql(query, engine)
+    conn = get_connection()
+    return pd.read_sql(query, conn)
 
-# -----------------------------
+# --------------------------------------------------
 # LOAD DATA
-# -----------------------------
+# --------------------------------------------------
 sales_df = load_data("SELECT * FROM globalpartners_gold.sales")
 clv_df = load_data("SELECT * FROM globalpartners_gold.daily_clv")
 rfm_df = load_data("SELECT * FROM globalpartners_gold.rfm")
@@ -42,28 +39,29 @@ loyalty_df = load_data("SELECT * FROM globalpartners_gold.loyalty")
 location_df = load_data("SELECT * FROM globalpartners_gold.location_performance")
 discounts_df = load_data("SELECT * FROM globalpartners_gold.discounts")
 
-# -----------------------------
+# --------------------------------------------------
 # CLEAN TYPES
-# -----------------------------
-for col in ["order_date"]:
-    if col in sales_df.columns:
-        sales_df[col] = pd.to_datetime(sales_df[col])
-    if col in location_df.columns:
-        location_df[col] = pd.to_datetime(location_df[col])
-    if col in discounts_df.columns:
-        discounts_df[col] = pd.to_datetime(discounts_df[col])
+# --------------------------------------------------
+if not sales_df.empty and "order_date" in sales_df.columns:
+    sales_df["order_date"] = pd.to_datetime(sales_df["order_date"], errors="coerce")
+
+if not location_df.empty and "order_date" in location_df.columns:
+    location_df["order_date"] = pd.to_datetime(location_df["order_date"], errors="coerce")
+
+if not discounts_df.empty and "order_date" in discounts_df.columns:
+    discounts_df["order_date"] = pd.to_datetime(discounts_df["order_date"], errors="coerce")
 
 for col in ["first_order_ts", "last_order_ts"]:
-    if col in clv_df.columns:
+    if not clv_df.empty and col in clv_df.columns:
         clv_df[col] = pd.to_datetime(clv_df[col], errors="coerce")
 
 for col in ["last_order_ts", "last_order_date"]:
-    if col in churn_df.columns:
+    if not churn_df.empty and col in churn_df.columns:
         churn_df[col] = pd.to_datetime(churn_df[col], errors="coerce")
 
-# -----------------------------
-# SIDEBAR FILTERS
-# -----------------------------
+# --------------------------------------------------
+# SIDEBAR
+# --------------------------------------------------
 st.sidebar.title("Filters")
 
 page = st.sidebar.radio(
@@ -79,46 +77,44 @@ page = st.sidebar.radio(
     ],
 )
 
-# Global date filter where applicable
-min_date = None
-max_date = None
-if not sales_df.empty:
+sales_filtered = sales_df.copy()
+location_filtered = location_df.copy()
+discounts_filtered = discounts_df.copy()
+
+if not sales_df.empty and "order_date" in sales_df.columns:
     min_date = sales_df["order_date"].min().date()
     max_date = sales_df["order_date"].max().date()
 
-if min_date and max_date:
     date_range = st.sidebar.date_input(
         "Date Range",
         value=(min_date, max_date),
         min_value=min_date,
         max_value=max_date,
     )
+
     if len(date_range) == 2:
         start_date, end_date = date_range
+
         sales_filtered = sales_df[
             (sales_df["order_date"].dt.date >= start_date)
             & (sales_df["order_date"].dt.date <= end_date)
         ].copy()
-        location_filtered = location_df[
-            (location_df["order_date"].dt.date >= start_date)
-            & (location_df["order_date"].dt.date <= end_date)
-        ].copy()
-        discounts_filtered = discounts_df[
-            (discounts_df["order_date"].dt.date >= start_date)
-            & (discounts_df["order_date"].dt.date <= end_date)
-        ].copy()
-    else:
-        sales_filtered = sales_df.copy()
-        location_filtered = location_df.copy()
-        discounts_filtered = discounts_df.copy()
-else:
-    sales_filtered = sales_df.copy()
-    location_filtered = location_df.copy()
-    discounts_filtered = discounts_df.copy()
 
-# -----------------------------
+        if not location_df.empty and "order_date" in location_df.columns:
+            location_filtered = location_df[
+                (location_df["order_date"].dt.date >= start_date)
+                & (location_df["order_date"].dt.date <= end_date)
+            ].copy()
+
+        if not discounts_df.empty and "order_date" in discounts_df.columns:
+            discounts_filtered = discounts_df[
+                (discounts_df["order_date"].dt.date >= start_date)
+                & (discounts_df["order_date"].dt.date <= end_date)
+            ].copy()
+
+# --------------------------------------------------
 # EXECUTIVE OVERVIEW
-# -----------------------------
+# --------------------------------------------------
 if page == "Executive Overview":
     st.title("Global Partners Business Insights Dashboard")
 
@@ -126,10 +122,14 @@ if page == "Executive Overview":
     total_orders = sales_filtered["total_orders"].sum() if not sales_filtered.empty else 0
     unique_customers = clv_df["user_id"].nunique() if not clv_df.empty else 0
     at_risk_customers = (
-        churn_df[churn_df["churn_status"] == "At Risk"].shape[0] if not churn_df.empty else 0
+        churn_df[churn_df["churn_status"] == "At Risk"].shape[0]
+        if not churn_df.empty and "churn_status" in churn_df.columns
+        else 0
     )
     vip_customers = (
-        rfm_df[rfm_df["rfm_segment"] == "VIP"].shape[0] if not rfm_df.empty else 0
+        rfm_df[rfm_df["rfm_segment"] == "VIP"].shape[0]
+        if not rfm_df.empty and "rfm_segment" in rfm_df.columns
+        else 0
     )
 
     c1, c2, c3, c4, c5 = st.columns(5)
@@ -146,7 +146,7 @@ if page == "Executive Overview":
         fig = px.line(daily_rev, x="order_date", y="total_revenue", title="Revenue Over Time")
         left.plotly_chart(fig, use_container_width=True)
 
-    if not rfm_df.empty:
+    if not rfm_df.empty and "rfm_segment" in rfm_df.columns:
         seg = rfm_df["rfm_segment"].value_counts().reset_index()
         seg.columns = ["rfm_segment", "count"]
         fig = px.bar(seg, x="rfm_segment", y="count", title="RFM Segment Distribution")
@@ -154,13 +154,13 @@ if page == "Executive Overview":
 
     left2, right2 = st.columns(2)
 
-    if not churn_df.empty:
+    if not churn_df.empty and "churn_status" in churn_df.columns:
         churn_counts = churn_df["churn_status"].value_counts().reset_index()
         churn_counts.columns = ["churn_status", "count"]
         fig = px.pie(churn_counts, names="churn_status", values="count", title="Churn Status")
         left2.plotly_chart(fig, use_container_width=True)
 
-    if not location_filtered.empty:
+    if not location_filtered.empty and "restaurant_id" in location_filtered.columns:
         top_locations = (
             location_filtered.groupby("restaurant_id", as_index=False)["total_revenue"]
             .sum()
@@ -175,9 +175,9 @@ if page == "Executive Overview":
         )
         right2.plotly_chart(fig, use_container_width=True)
 
-# -----------------------------
+# --------------------------------------------------
 # SALES TRENDS
-# -----------------------------
+# --------------------------------------------------
 elif page == "Sales Trends":
     st.title("Sales Trends and Seasonality")
 
@@ -198,27 +198,29 @@ elif page == "Sales Trends":
 
         col3, col4 = st.columns(2)
 
-        by_category = (
-            sales_filtered.groupby("item_category", as_index=False)["total_revenue"]
-            .sum()
-            .sort_values("total_revenue", ascending=False)
-            .head(15)
-        )
-        fig3 = px.bar(by_category, x="item_category", y="total_revenue", title="Revenue by Category")
-        col3.plotly_chart(fig3, use_container_width=True)
+        if "item_category" in sales_filtered.columns:
+            by_category = (
+                sales_filtered.groupby("item_category", as_index=False)["total_revenue"]
+                .sum()
+                .sort_values("total_revenue", ascending=False)
+                .head(15)
+            )
+            fig3 = px.bar(by_category, x="item_category", y="total_revenue", title="Revenue by Category")
+            col3.plotly_chart(fig3, use_container_width=True)
 
-        by_location = (
-            sales_filtered.groupby("restaurant_id", as_index=False)["total_revenue"]
-            .sum()
-            .sort_values("total_revenue", ascending=False)
-            .head(15)
-        )
-        fig4 = px.bar(by_location, x="restaurant_id", y="total_revenue", title="Revenue by Location")
-        col4.plotly_chart(fig4, use_container_width=True)
+        if "restaurant_id" in sales_filtered.columns:
+            by_location = (
+                sales_filtered.groupby("restaurant_id", as_index=False)["total_revenue"]
+                .sum()
+                .sort_values("total_revenue", ascending=False)
+                .head(15)
+            )
+            fig4 = px.bar(by_location, x="restaurant_id", y="total_revenue", title="Revenue by Location")
+            col4.plotly_chart(fig4, use_container_width=True)
 
-# -----------------------------
+# --------------------------------------------------
 # CLV
-# -----------------------------
+# --------------------------------------------------
 elif page == "Customer Lifetime Value":
     st.title("Customer Lifetime Value")
 
@@ -251,9 +253,9 @@ elif page == "Customer Lifetime Value":
             use_container_width=True
         )
 
-# -----------------------------
+# --------------------------------------------------
 # RFM
-# -----------------------------
+# --------------------------------------------------
 elif page == "RFM Segmentation":
     st.title("RFM Segmentation")
 
@@ -281,9 +283,9 @@ elif page == "RFM Segmentation":
         vip_df = rfm_df[rfm_df["rfm_segment"] == "VIP"].sort_values("monetary_value", ascending=False).head(20)
         st.dataframe(vip_df, use_container_width=True)
 
-# -----------------------------
+# --------------------------------------------------
 # CHURN
-# -----------------------------
+# --------------------------------------------------
 elif page == "Churn Risk":
     st.title("Churn Risk Indicators")
 
@@ -318,9 +320,9 @@ elif page == "Churn Risk":
             use_container_width=True
         )
 
-# -----------------------------
+# --------------------------------------------------
 # LOYALTY & LOCATION
-# -----------------------------
+# --------------------------------------------------
 elif page == "Loyalty & Location":
     st.title("Loyalty and Location Performance")
 
@@ -383,9 +385,9 @@ elif page == "Loyalty & Location":
             st.subheader("Top Locations Table")
             st.dataframe(top_locations, use_container_width=True)
 
-# -----------------------------
+# --------------------------------------------------
 # DISCOUNTS
-# -----------------------------
+# --------------------------------------------------
 elif page == "Discount Impact":
     st.title("Pricing and Discount Effectiveness")
 
