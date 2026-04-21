@@ -91,3 +91,19 @@ aws glue start-workflow-run --name globalpartner_workflow
 aws glue get-workflow-run --name globalpartner_workflow --run-id YOUR_RUN_ID
 ```
 
+
+## AWS Glue Workflow – Orchestration 
+
+<p align="center"> <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/glue%20workflow%201.png" width="750"/> </p>
+
+## AWS Glue Workflow – Orchestration 
+
+<p align="center"> <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/glue%20workflow%202.png" width="750"/> </p>
+
+## AWS Glue Workflow – Orchestration 
+
+<p align="center"> <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/glue%20workflow%203.png" width="750"/> </p>
+
+## AWS Glue Workflow – Orchestration 
+
+<p align="center"> <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/glue%20workflow%204.png" width="750"/> </p>
