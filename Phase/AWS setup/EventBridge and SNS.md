@@ -205,3 +205,18 @@ Time: <time>
 ## STEP 8 — Create Rule
 
 - Click Create rule
+
+
+## Amazon SNS – Notification Setup
+
+<p align="center"> <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/SNS.png" width="750"/> </p>
+
+## Amazon EventBridge – Scheduled Trigger
+
+<p align="center"> <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/Eventbridge%20rule.png" width="750"/> </p>
+
+
+## Amazon SNS – Pipeline Execution Alert
+
+<p align="center"> <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/Phase/Reference%20Files/SNS%20result.png" width="750"/> </p>
+
