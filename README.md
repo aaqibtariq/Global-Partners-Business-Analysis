@@ -1,47 +1,114 @@
-# Global-Partners-Business-Analysis
+# Global Partners Data Engineering Project
 
 
 # Objective 
 
-Company wants a unified data view across restaurant locations and ordering platforms to understand:
+This project demonstrates an end-to-end modern data engineering pipeline on AWS, designed to ingest, transform, and serve business data using a medallion architecture (Bronze → Silver → Gold).
 
-- **customer behavior**
-- **spending patterns**
-- **overall business performance**
-- **daily CLV**
-- **customer value tiers**
-- **RFM segmentation**
-- **churn risk**
-- **sales trends and seasonality**
-- **loyalty vs non-loyalty performance**
-- **best/worst locations**
-- **pricing and promotion impact**
-
-That means the final platform should answer questions like:
-
-- **Who are our best customers?**
-- **Which customers are about to stop ordering?**
-- **Are loyalty customers actually more valuable?**
-- **Which stores perform best?**
-- **Are discounts helping or hurting?**
-- **What are the strongest time patterns in the business?**
+The pipeline processes transactional data from a SQL Server database and builds analytical datasets for reporting and business insights using AWS-native services.
 
 
-This project is really solving three business problems at once.
+# Core Objective
 
-## Problem 1: Customer value visibility
+The main objective of this project is to:
 
-The company wants to know how much each customer is worth and how that changes daily. That is the CLV/LTV requirement.
+- Build a scalable and cost-efficient data pipeline
+- Implement data lake architecture using AWS S3 + Delta Lake
+- Enable analytical querying using AWS Athena
+- Apply best practices in orchestration, monitoring, and automation
 
-## Problem 2: Customer lifecycle management
+# Project Goal
 
-The company wants to segment customers and detect churn risk using RFM and inactivity behavior.
+- Automate ingestion from SQL Server → AWS S3
+- Clean and transform raw data into analytics-ready datasets
+- Design a production-grade workflow using AWS Glue & EventBridge
+- Enable business-level insights through Gold layer datasets
 
-## Problem 3: Store and promotion performance
+**This project is really solving three business problems at once.**
 
-The company wants to compare stores, loyalty behavior, time patterns, and promotion effects.
+- Problem 1: Customer value visibility
+  -  The company wants to know how much each customer is worth and how that changes daily. That is the CLV/LTV requirement.
+- Problem 2: Customer lifecycle management
+  - The company wants to segment customers and detect churn risk using RFM and inactivity behavior.
+- Problem 3: Store and promotion performance
+  - The company wants to compare stores, loyalty behavior, time patterns, and promotion effects.
 
-So the project is both:
+- So the project is both:
+  - customer analytics
+  - business performance analytics
+ 
+  #  Abstract
 
-- **customer analytics**
-- **business performance analytics**
+This project simulates a real-world enterprise data pipeline where raw operational data is ingested, transformed, and served for analytics.
+The system leverages AWS services such as:
+
+- AWS Glue for ETL
+- Amazon S3 for storage
+- AWS Athena for querying
+- EventBridge for orchestration
+- SNS for notifications
+- Ec2 for Compute
+- Streamlit for Visualization
+
+The architecture ensures data reliability, scalability, and performance, following industry-standard design patterns.
+
+# Technical Architecture
+
+```
+SQL Server (RDS)
+        ↓
+AWS Glue (Bronze Ingestion)
+        ↓
+S3 (Bronze - Delta)
+        ↓
+AWS Glue (Silver Transformation)
+        ↓
+S3 (Silver - Cleaned Data)
+        ↓
+AWS Glue (Gold Aggregation)
+        ↓
+S3 (Gold - Business Metrics)
+        ↓
+AWS Athena
+        ↓
+Analytics / Reporting in streamlit
+
+```
+
+# Architecture Components
+
+- Source: SQL Server (AWS RDS)
+- Ingestion: AWS Glue (JDBC connection)
+- Storage: Amazon S3 (Delta format)
+- Processing: AWS Glue (PySpark)
+- Orchestration: AWS Glue Workflow + EventBridge
+- Monitoring: CloudWatch + SNS
+- Query Layer: AWS Athena
+- Compute / App Layer: EC2
+- Visualization / BI Layer: Streamlit Dashboard
+
+
+# Key Metrics
+
+This pipeline enables analysis such as:
+
+- Total Orders
+- Revenue Calculation
+- Item-Level Performance
+- Option-Level Revenue Impact
+- Daily Trends via Date Dimension
+
+**From Dashboard**
+
+- Total Revenue: ~$10M
+- Total Orders: 171K
+- Customers: 20K
+- At-Risk Customers: 17K
+- VIP Customers: 1,119
+
+# Project Phases
+
+## Phase 1: Data Ingestion (Bronze Layer)
+
+
+
