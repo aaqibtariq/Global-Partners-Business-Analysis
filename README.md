@@ -133,11 +133,11 @@ This pipeline enables analysis such as:
     -  [Silver Layer Documentation](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/blob/main/Phase/Silver/readme.md)  
 -  Glue Transformation
     -  [Glue Transformation Scripts](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/blob/main/Phase/S3%20Scripts/Silver%20Scripts.md)  
+-  Athena created Database to test the result
+    -  [Athena Queries – Silver Layer](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/blob/main/Phase/Amazon%20Athena/Silver%20phase.md)  
+    -  [Athena Results – Silver Layer](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/tree/main/Phase/Amazon%20Athena/silver%20phase%20result)
 - All setup reference Files
     -  [Reference Files (Outputs & Screenshots)](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/tree/main/Phase/Reference%20Files/Silver)  
--Athena created Database to test the result
-    -  [Athena Queries – Silver Layer](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/blob/main/Phase/Amazon%20Athena/Silver%20phase.md)  
-    -  [Athena Results – Silver Layer](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/tree/main/Phase/Amazon%20Athena/silver%20phase%20result)  
 
 
 
