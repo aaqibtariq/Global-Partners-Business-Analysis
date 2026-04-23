@@ -139,5 +139,31 @@ This pipeline enables analysis such as:
 - All setup reference Files
     -  [Reference Files (Outputs & Screenshots)](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/tree/main/Phase/Reference%20Files/Silver)  
 
+# Phase 3: Data Aggregation (Gold Layer)
+
+- Setup Gold Layer
+    -  [Gold Layer Documentation](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/tree/main/Phase/Gold)  
+-  Glue Transformation
+    -  [Gold Layer Transformation Scripts](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/blob/main/Phase/S3%20Scripts/Gold%20Scripts.md)  
+-  Athena created Database to test the result
+    -  [Athena Queries – Gold Layer](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/blob/main/Phase/Amazon%20Athena/Gold%20Phase.md)  
+    -  [Athena Results – Gold Layer](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/tree/main/Phase/Amazon%20Athena/Gold%20phase%20result)  
+
+# phase 5: Streamlit & Orchestration & Automation
+
+
+
+
+
+# Phase 6: Orchestration & Automation
+
+Created AWS Glue Workflow
+Added triggers for:
+Bronze → Silver → Gold flow
+Configured EventBridge for scheduling
+Integrated SNS for notifications
+
+
+
 
 
