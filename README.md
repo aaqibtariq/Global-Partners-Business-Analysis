@@ -37,6 +37,8 @@ The main objective of this project is to:
   - customer analytics
   - business performance analytics
  
+    - [Project Objectives & Business Goals](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/blob/main/Phase/Objectives%20and%20output.md)
+ 
   #  Abstract
 
 This project simulates a real-world enterprise data pipeline where raw operational data is ingested, transformed, and served for analytics.
@@ -151,19 +153,30 @@ This pipeline enables analysis such as:
 
 # phase 5: Streamlit & Orchestration & Automation
 
+-  Amazon EC2: Hosts the Streamlit application and manages query execution
+        - [EC2 Setup & Configuration](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/blob/main/Phase/AWS%20setup/EC2.md)
+-  Glue Workflow Bronze → Silver → Gold flow
+        - [AWS Glue Workflows](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/blob/main/Phase/AWS%20setup/Glue%20Workflows.md)
+-  Event Rule & SNS: Configured EventBridge for scheduling and Integrated SNS for notifications
+        - [EventBridge Scheduling & SNS Alerts](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/blob/main/Phase/AWS%20setup/EventBridge%20and%20SNS.md)  
+-  Streamlit
+        - [Streamlit Dashboard Application](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/tree/main/Phase/Streamlit)
+-  Streamlit Dashboard: Provides an interactive interface for business users to explore insights such as:
+    -  Customer lifetime value (CLV)
+    -  RFM segmentation
+    -  Churn risk
+    -  Sales trends
+    -  Store performance
+
+The application queries data from AWS Athena, ensuring a serverless and scalable analytics experience.
+
+- **[Analytics Dashboard (Streamlit / Visualization)](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/tree/main/Phase/Dashboard)**
 
 
+- **Reference Files**
+      -  [All Reference Files (Screenshots, Outputs, Configurations)](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/tree/main/Phase/Reference%20Files)
 
 
-# Phase 6: Orchestration & Automation
-
-Created AWS Glue Workflow
-Added triggers for:
-Bronze → Silver → Gold flow
-Configured EventBridge for scheduling
-Integrated SNS for notifications
-
-
-
+  **End**
 
 
