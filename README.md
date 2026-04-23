@@ -114,5 +114,18 @@ This pipeline enables analysis such as:
 
 ## Phase 1: Data Ingestion (Bronze Layer)
 
+-  Setup AWS Permissions
+  - [IAM Roles & Policies Setup](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/blob/main/Phase/AWS%20setup/IAM%20Roles%20%26%20Policies.md)
+-  Created SQL Server database in AWS RDS
+  - [RDS and SSMS Setup](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/blob/main/Phase/AWS%20setup/RDS%20and%20SSMS%20setup.md)
+-  Loaded raw CSV data into SQL Server
+-  Configured AWS Glue connection (JDBC)
+    - [Bronze Layer – AWS Glue Setup](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/blob/main/Phase/AWS%20setup/Bronze%20Glue%20Setup.md)
+-  Built Glue jobs to extract data into S3
+-  Stored data in Delta format
+  - [S3 Scripts – Bronze Layer](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/blob/main/Phase/S3%20Scripts/Bronze%20scripts.md)
+- Created Database to test the result
+  - [Athena – Bronze Phase Queries](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/blob/main/Phase/Amazon%20Athena/Bronze%20phase.md)
+  - [Bronze Phase Results (Athena Output)](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/tree/main/Phase/Amazon%20Athena/Bronze%20phase%20result)
 
 
