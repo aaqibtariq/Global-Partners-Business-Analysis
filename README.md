@@ -124,8 +124,20 @@ This pipeline enables analysis such as:
 -  Built Glue jobs to extract data into S3
 -  Stored data in Delta format
     - [S3 Scripts – Bronze Layer](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/blob/main/Phase/S3%20Scripts/Bronze%20scripts.md)
-- Created Database to test the result
+- Athena created Database to test the result
     - [Athena – Bronze Phase Queries](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/blob/main/Phase/Amazon%20Athena/Bronze%20phase.md)
     - [Bronze Phase Results (Athena Output)](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/tree/main/Phase/Amazon%20Athena/Bronze%20phase%20result)
+
+## Phase 2: Data Transformation (Silver Layer)
+- Setup Silver Layer
+    -  [Silver Layer Documentation](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/blob/main/Phase/Silver/readme.md)  
+-  Glue Transformation
+    -  [Glue Transformation Scripts](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/blob/main/Phase/S3%20Scripts/Silver%20Scripts.md)  
+- All setup reference Files
+    -  [Reference Files (Outputs & Screenshots)](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/tree/main/Phase/Reference%20Files/Silver)  
+-Athena created Database to test the result
+    -  [Athena Queries – Silver Layer](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/blob/main/Phase/Amazon%20Athena/Silver%20phase.md)  
+    -  [Athena Results – Silver Layer](https://github.com/aaqibtariq/Global-Partners-Business-Analysis/tree/main/Phase/Amazon%20Athena/silver%20phase%20result)  
+
 
 
