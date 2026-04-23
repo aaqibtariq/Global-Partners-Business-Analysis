@@ -74,6 +74,10 @@ AWS Athena
 Analytics / Reporting in streamlit
 
 ```
+# **End-to-End System Design – Data Pipeline Architecture**
+
+<p align="center"> <img src="https://raw.githubusercontent.com/aaqibtariq/Global-Partners-Business-Analysis/main/System%20Design/SD.png" width="800"/> </p>
+
 
 # Architecture Components
 
